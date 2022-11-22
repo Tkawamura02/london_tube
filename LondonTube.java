@@ -3,13 +3,14 @@ import java.util.HashSet;
 import java.io.File;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 public class LondonTube {
 
 	public static void main(String[] args) throws IllegalArgumentException {
 		Scanner kbrd = new Scanner(System.in);
 		
-		System.out.println("London Tube - <Your Name>\n");
+		System.out.println("London Tube - Tiffany Kawamura\n");
 
 		Graph<Station, LineSegment> g = readNetwork();
 
@@ -40,8 +41,7 @@ public class LondonTube {
 		}
 	}
 
-	public static PositionalList<Edge<LineSegment>> getPath(Graph<Station, LineSegment> g, Vertex<Station> origin,
-			Vertex<Station> destination) {
+	public static PositionalList<Edge<LineSegment>> getPath(Graph<Station, LineSegment> g, Vertex<Station> origin,Vertex<Station> destination) {
 		Set<Vertex<Station>> known = new HashSet<Vertex<Station>>();
 		Map<Vertex<Station>, Edge<LineSegment>> forest = new ProbeHashMap<Vertex<Station>, Edge<LineSegment>>();
 
@@ -52,20 +52,43 @@ public class LondonTube {
 		return path;
 	}
 
-	public static void printPath(Graph<Station, LineSegment> g, PositionalList<Edge<LineSegment>> path,
-			Vertex<Station> origin) {
+	public static void printPath(Graph<Station, LineSegment> g, PositionalList<Edge<LineSegment>> path,Vertex<Station> origin) {
 		Vertex<Station> current = origin;
 		Vertex<Station> next;
+		ArrayList<String> stops = new ArrayList<String>();
+		ArrayList<String> line = new ArrayList<String>();
+		String futLine = null;
+		String prevLine = null;
+		String futStation = null;
+		int i = 0;
 
 		for (Edge<LineSegment> e : path) {
+			i++;
 			Vertex<Station>[] v = g.endVertices(e);
 			if (v[0] == current)
 				next = v[1];
-			else
+			else 
 				next = v[0];
-
-			System.out.printf("Take the %s line from %s to %s\n", e.getElement().getLine().getName(),
-					current.getElement().getName(), next.getElement().getName());
+			
+			line.add(e.getElement().getLine().getName());
+			stops.add(current.getElement().getName());
+			stops.add(next.getElement().getName());
+			
+			futLine = e.getElement().getLine().getName();
+			
+			if (prevLine != futLine && prevLine != null & futLine !=null) { //finished pathway and more than one line
+				System.out.printf("Take the %s line from %s to %s\n", prevLine,
+				stops.get(0), current.getElement().getName());
+				System.out.printf("Switch to the %s line at %s\n", futLine, current.getElement().getName());
+				line.clear(); stops.clear();
+			} 
+			else if (path.size()==i) {
+				System.out.printf("Take the %s line from %s to %s\n", prevLine,
+				stops.get(0), next.getElement().getName());
+				line.clear(); stops.clear(); futLine = null;
+			}
+			
+			prevLine = e.getElement().getLine().getName();
 			current = next;
 		}
 	}
