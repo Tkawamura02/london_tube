@@ -1,0 +1,15 @@
+Line Central
+	Tottenham Court Road
+	Oxford Circus
+	Bond Street
+	Marble Arch
+	Lancaster Gate
+	Queensway
+	Notting Hill Gate
+End
+
+Line Bakerloo
+	Baker Street
+	Regent's Park
+	Oxford Circus
+End
