@@ -52,44 +52,94 @@ public class LondonTube {
 		return path;
 	}
 
+//	public static void printPath(Graph<Station, LineSegment> g, PositionalList<Edge<LineSegment>> path,Vertex<Station> origin) {
+//		Vertex<Station> current = origin;
+//		Vertex<Station> next;
+//		int i = 0;
+//
+//		for (Edge<LineSegment> e : path) {
+//			i++;
+//			Vertex<Station>[] v = g.endVertices(e);
+//			if (v[0] == current)
+//				next = v[1];
+//			else 
+//				next = v[0];
+//			
+//			System.out.printf("Take the %s line from %s to %s\n", e.getElement().getLine().getName(),
+//					current.getElement().getName(), next.getElement().getName());
+//			current = next;
+//		}
+//	}
+	
 	public static void printPath(Graph<Station, LineSegment> g, PositionalList<Edge<LineSegment>> path,Vertex<Station> origin) {
 		Vertex<Station> current = origin;
 		Vertex<Station> next;
-		ArrayList<String> stops = new ArrayList<String>();
-		ArrayList<String> line = new ArrayList<String>();
-		String futLine = null;
-		String prevLine = null;
-		String futStation = null;
-		int i = 0;
+		ArrayList<String> stations = new ArrayList<String>(); stations.add(origin.getElement().getName());
+		ArrayList<String> lines = new ArrayList<String>(); 
+		ArrayList<Integer> switches = new ArrayList<Integer>(); 
+		int counter = 0;
 
 		for (Edge<LineSegment> e : path) {
-			i++;
+			counter++;
 			Vertex<Station>[] v = g.endVertices(e);
 			if (v[0] == current)
 				next = v[1];
 			else 
 				next = v[0];
-			
-			line.add(e.getElement().getLine().getName());
-			stops.add(current.getElement().getName());
-			stops.add(next.getElement().getName());
-			
-			futLine = e.getElement().getLine().getName();
-			
-			if (prevLine != futLine && prevLine != null & futLine !=null) { //finished pathway and more than one line
-				System.out.printf("Take the %s line from %s to %s\n", prevLine,
-				stops.get(0), current.getElement().getName());
-				System.out.printf("Switch to the %s line at %s\n", futLine, current.getElement().getName());
-				line.clear(); stops.clear();
-			} 
-			else if (path.size()==i) {
-				System.out.printf("Take the %s line from %s to %s\n", prevLine,
-				stops.get(0), next.getElement().getName());
-				line.clear(); stops.clear(); futLine = null;
-			}
-			
-			prevLine = e.getElement().getLine().getName();
+		
+			stations.add(next.getElement().getName());
+			lines.add(e.getElement().getLine().getName());
+
 			current = next;
+		}
+		
+		int linesSize = lines.size()-1;
+		int stationsSize = stations.size()-1;
+		int numswitches = 0;
+		int nextswitch=0;
+		
+		//count number of switches
+		for (int i = 0; i<linesSize; i++) {
+			int temp = i+1;
+			if (lines.get(i) != lines.get(temp)) {
+				switches.add(i);
+				numswitches++;
+			}
+		}
+		
+		//print methods
+		if (numswitches==0) {
+			System.out.printf("Take the %s line from %s to %s\n", lines.get(0), stations.get(0), stations.get(stationsSize));
+		} else if (numswitches>0) {
+			int temp = switches.get(0);
+			
+			System.out.printf("Take the %s line from %s to %s\n", lines.get(0), stations.get(0), stations.get(temp+1)); //base
+			for (int i = 0; i<numswitches; i++) {
+				
+				int temp2 = switches.get(i);
+				System.out.printf("Switch to the %s line at %s\n", lines.get(temp2+1), stations.get(temp2+1));
+				
+				if (numswitches==1) {
+					if (i == 0)
+						System.out.printf("Take the %s line from %s to %s\n", lines.get(temp2+1), stations.get(temp2+1), stations.get(stationsSize));
+				}
+				else if (numswitches==2) {
+					if (i == 0) {
+						nextswitch = switches.get(i+1);
+						System.out.printf("Take the %s line from %s to %s\n", lines.get(temp2+1), stations.get(temp2+1), stations.get(nextswitch+1));
+					} else if (i==1) {
+						System.out.printf("Take the %s line from %s to %s\n", lines.get(temp2+1), stations.get(temp2+1), stations.get(stationsSize));
+					}
+				}
+				
+//				System.out.println("i" + i);
+//				System.out.println("LINES" + lines);
+//				System.out.println("STATIONS" + stations);
+//				System.out.println("NUMSWITCHES" + numswitches);
+//				System.out.println("SWITCHES" + switches);
+//				System.out.println("NEXTSWITCH" + nextswitch);
+//				System.out.println("STATIONSIZE" + stationsSize);
+			}
 		}
 	}
 
@@ -149,7 +199,11 @@ public class LondonTube {
 
 	static public Vertex<Station> findStation(Graph<Station, LineSegment> g, String name) {
 		for (Vertex<Station> v : g.vertices()) {
-			if (v.getElement().getName().equals(name))
+			String nospaceName = name.replaceAll("\\s+","");
+			String rName = nospaceName.replaceAll("[',.]", "").toLowerCase();
+			String nospaceElement = v.getElement().getName().replaceAll("\\s+","");
+			String rElement = nospaceElement.replaceAll("[',.]", "").toLowerCase();
+			if (rElement.equals(rName))
 				return v;
 		}
 		return null;
